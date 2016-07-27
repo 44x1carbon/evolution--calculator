@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <style media="screen">
+      form{
+        padding: 20px;
+        border: solid 1px;
+        margin-bottom: 20px;
+      }
+      .form-group{
+        margin-right: 10px;
+      }
+      .result{
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body class="container">
+    <h1>進化計算機</h1>
+    <p>
+      ポケモンGoで効率よく進化させるために、博士に何匹送ればいいかを計算してくれます。
+    </p>
+    <form class="form-inline">
+      <div class="form-group">
+        <label for="candy">もっているアメの数</label>
+        <input type="number" name="name" value="0" id="candy">
+      </div>
+      <div class="form-group">
+        <label for="evo-candy">必要なアメの数</label>
+        <input type="number" name="name" value="0" id="evo-candy">
+      </div>
+      <div class="form-group">
+        <label for="poppo">もっているポケモンの数</label>
+        <input type="number" name="name" value="0" id="poppo">
+      </div><br>
+      <div class="form-group">
+        <label for="useEvo">進化したポケモンもアメにする</label>
+        <input type="checkbox" name="" id="useEvo">
+      </div>
+      <div class="form-group">
+        <label for="useTamago">幸せのたまご</label>
+        <input type="checkbox" name="" id="useTamago" >
+      </div>
+      <button type="button" onclick="calc()" class="pull-right">計算</button>
+    </form>
+    <div class="result">
+      <h3>計算結果</h3>
+      <table>
+        <tr><th>博士に送るポケモン</th><th>：</th><td id="result-usePoppo"></td></tr>
+        <tr><th>博士に送る進化系</th><th>：</th><td id="result-useEvo"></td></tr>
+        <tr><th>残りのポケモン</th><th>：</th><td id="result-poppo"></td></tr>
+        <tr><th>進化させる数</th><th>：</th><td id="result-evo"></td></tr>
+        <tr><th>獲得経験値</th><th>：</th><td id="result-exp"></td></tr>
+      </table>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script>
+      var data;
+      var init = function(){
+        data = {
+          candy: $('#candy').val() - 0,
+          usePoppo:0,
+          poppo:  $('#poppo').val() - 0,
+          exp: 0,
+          evo: 0,
+          useEvo: 0,
+          evoNum:0,
+          evoCandy: $('#evo-candy').val() - 0,
+        }
+      }
+      var evoCandy = function(){
+
+        var result = Math.floor(data.candy / data.evoCandy);
+        if(isNaN(result)){
+          return 0;
+        }
+        if(data.poppo < result){
+          evo(data.poppo);
+        } else {
+          evo(result);
+        }
+        console.log(data);
+      }
+      var evoPoppo = function(){
+        var result =  Math.floor((data.candy + data.poppo) / data.evoCandy);
+        var usePoppo = result * data.evoCandy - data.candy;
+        if(isNaN(result)){
+          return 0;
+        }
+        if(data.poppo - usePoppo < result){
+          var evoNum = data.poppo - usePoppo;
+          sendHakase(evoNum * data.evoCandy);
+          evo(evoNum);
+        } else {
+          sendHakase(usePoppo);
+          evo(result);
+        }
+        console.log(data);
+      }
+      var evoEvo = function(){
+        var result =  Math.floor((data.poppo + data.evo) / data.evoCandy);
+        var usePoppo = result * data.evoCandy - data.evo;
+        if(isNaN(result)){
+          return 0;
+        }
+        if(data.poppo - usePoppo < result){
+          var evoNum = data.poppo - usePoppo;
+          sendHakase(evoNum * data.evoCandy - data.evo);
+          sendHakaseEvo(data.evo);
+          evo(evoNum);
+        } else {
+          sendHakase(usePoppo);
+          sendHakaseEvo(data.evo);
+          evo(result);
+        }
+        console.log(data);
+      }
+
+      var sendHakase = function(num){
+        data.poppo -= num;
+        data.usePoppo += num;
+        data.candy += num;
+      }
+      var sendHakaseEvo = function(num){
+        data.evo -= num;
+        data.useEvo += num;
+        data.candy += num;
+      }
+      var evo = function(num){
+        data.candy -= num * data.evoCandy;
+        data.evo += num;
+        data.poppo -= num;
+        data.evoNum += num;
+        data.exp += num * getExp();
+      }
+
+      var getExp = function(){
+        if($('#useTamago').prop('checked')){
+          return 500 * 2;
+        } else {
+          return 500;
+        }
+      }
+
+      var isUseEvo = function(){
+        return $('#useEvo').prop('checked');
+      }
+
+      var displayResult = function(){
+        $('#result-usePoppo').text(data.usePoppo + '匹');
+        $('#result-useEvo').text(data.useEvo　+ '匹');
+        $('#result-poppo').text(data.poppo　+ '匹');
+        $('#result-evo').text(data.evoNum　+ '匹');
+        $('#result-exp').text(data.exp　+ 'xp');
+      }
+
+      var calc = function(){
+        init();
+        evoCandy();
+        evoPoppo();
+        if(isUseEvo())
+          evoEvo();
+        displayResult();
+      }
+    </script>
+  </body>
+</html>
