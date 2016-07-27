@@ -77,7 +77,6 @@
         }
       }
       var evoCandy = function(){
-
         var result = Math.floor(data.candy / data.evoCandy);
         if(isNaN(result)){
           return 0;
@@ -87,7 +86,6 @@
         } else {
           evo(result);
         }
-        console.log(data);
       }
       var evoPoppo = function(){
         var result =  Math.floor((data.candy + data.poppo) / data.evoCandy);
@@ -103,7 +101,6 @@
           sendHakase(usePoppo);
           evo(result);
         }
-        console.log(data);
       }
       var evoEvo = function(){
         var result =  Math.floor((data.poppo + data.evo) / data.evoCandy);
@@ -117,11 +114,12 @@
           sendHakaseEvo(data.evo);
           evo(evoNum);
         } else {
-          sendHakase(usePoppo);
+          if(usePoppo > 0){
+            sendHakase(usePoppo);
+          }
           sendHakaseEvo(data.evo);
           evo(result);
         }
-        console.log(data);
       }
 
       var sendHakase = function(num){
